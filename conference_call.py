@@ -13,6 +13,8 @@ Author: Jacob Mulford
 Copywrite Bandwidth INC 2018
 """
 
+import requests
+
 
 usage = """
 python conference_call.py <member-1-number> <member-2-number> ... <member-n-number> <bandwidth_phone_number>
@@ -29,20 +31,45 @@ try:
     BANDWIDTH_USER_ID = os.environ['BANDWIDTH_USER_ID']
     BANDWIDTH_API_SECRET = os.environ['BANDWIDTH_API_SECRET']
     BANDWIDTH_API_TOKEN = os.environ['BANDWIDTH_API_TOKEN']
+    AUTH = (BANDWIDTH_API_TOKEN, BANDWIDTH_API_SECRET)
 except:
     print("You need to set the following environmental variables: BANDWIDTH_USER_ID, BANDWIDTH_API_SECRET, BANDWIDTH_API_TOKEN")
     exit(-1)
 
 
-def end_conference_with_text(conference_id, bandwidth_phone_number):
+def end_conference_with_text(conference_id, phone_numbers, bandwidth_phone_number):
     """
     Ends the conference call on user input
 
     Args:
         conference_id (str): ID of the conference to end
+        phone_numbers (list<str>): All phone numbers in the conference
         bandwidth_phone_number (str): The Bandwidth phone number used to send the conference ending group text
+
+    Returns:
+        void
     """
     group_text_message = input("Please type your ending text message and press enter when you are ready to end conference " + conference_id + ":\n")
+
+    #end conference
+    end_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    end_conference_payload = {
+        "state": "completed"
+    }
+    requests.post(end_conference_url, auth=AUTH, json=end_conference_payload)
+
+    #send message
+    ##TODO: Change to V2 group message
+    send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
+    send_text_payload = {
+        "from": bandwidth_phone_number,
+        "to": "",
+        "text": group_text_message
+    }
+    for phone_number in phone_numbers:
+        send_text_payload["to"] = phone_number
+        print(requests.post(send_text_url, auth=AUTH, json=send_text_payload))
+
     print("Conference " + conference_id + " has been ended. Group text send by " + bandwidth_phone_number)
     print("Group text message: " + group_text_message)
 
@@ -58,8 +85,37 @@ def start_conference(phone_numbers, bandwidth_phone_number):
     Returns:
         str: The ID of the conference call
     """
+    #Start conference
+    conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences".format(user_id = BANDWIDTH_USER_ID)
+    start_conference_payload = {
+        "from": bandwidth_phone_number
+    }
+    response = requests.post(conference_url, auth=AUTH, json=start_conference_payload)
+    conference_id = response.headers['Location'].split("/")[-1]
+
+    #Add members to conference
+    call_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/calls".format(user_id = BANDWIDTH_USER_ID)
+    call_payload = {
+        "from": bandwidth_phone_number,
+        "to": "",
+        "conferenceId": conference_id
+    }
+    add_call_to_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    add_call_to_conference_payload = {
+        "callId": ""
+    }
+
+    for phone_number in phone_numbers:
+        #Create call
+        call_payload["to"] = phone_number
+        response = requests.post(call_url, auth=AUTH, json=call_payload)
+        call_id = response.headers['Location'].split("/")[-1]
+        #Add call to conference
+        add_call_to_conference_payload["callId"] = call_id
+        response = requests.post(add_call_to_conference_url, auth=AUTH, json=add_call_to_conference_payload)
+
     print("Conference call has been started by " + bandwidth_phone_number + " to " + str(phone_numbers))
-    return "34dladc3"
+    return conference_id
 
 
 def main(phone_numbers, bandwidth_phone_number):
@@ -67,21 +123,21 @@ def main(phone_numbers, bandwidth_phone_number):
     Main method for the script
 
     Args:
-        phone_numbers (list<string): The phone numbers to use for the conference
+        phone_numbers (list<string>): The phone numbers to use for the conference
         bandwidth_phone_number (str): The Bandwidth phone number to send the ending group text
 
     Returns:
         void
     """
     conference_id = start_conference(phone_numbers, bandwidth_phone_number)
-    end_conference_with_text(conference_id, bandwidth_phone_number)
+    end_conference_with_text(conference_id, phone_numbers, bandwidth_phone_number)
 
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) < 5 or len(sys.argv) > 12:
+    """if len(sys.argv) < 5 or len(sys.argv) > 12:
         print("You must have at least 3 phone numbers to make a conference call. The maximum number of phone numbers allowed is 10")
         print(usage)
-        exit(-1)
+        exit(-1)"""
 
     main(sys.argv[1:-1], sys.argv[-1])

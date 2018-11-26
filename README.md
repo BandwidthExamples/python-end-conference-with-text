@@ -46,21 +46,21 @@ Example
 python conference_call.py +19191112222 +19191112223 +19191112224 +18281112222
 ```
 
-In this example, the 3 conference members will be `+19191112222 +19191112223 +19191112224` and the final group text will be sent by `+18281112222`
+In this example, the 3 conference members will be `+19191112222 +19191112223 +19191112224` and the phone number for starting the conference and senting the final group text will be `+18281112222`
 
 After starting the conference call, you will receive a prompt that looks like this
 
 ```
 Conference call has been started by +18281112222 to ['+19191112222', '+19191112223', '+19191112224']
-Please type your ending text message and press enter when you are ready to end conference 34dladc3:
+Please type your ending text message and press enter when you are ready to end conference conf-34dladc3:
 
 ```
 
 Type in your message and press enter to end the conference with the group text
 
 ```
-Please type your ending text message and press enter when you are ready to end conference 34dladc3:
+Please type your ending text message and press enter when you are ready to end conference conf-34dladc3:
 We're done! Please remember to schedule time for our next meeting.
-Conference 34dladc3 has been ended. Group text send by +18281112222
+Conference conf-34dladc3 has been ended. Group text send by +18281112222
 Group text message: We're done! Please remember to schedule time for our next meeting.
 ```
