@@ -197,9 +197,9 @@ def main(phone_numbers, bandwidth_phone_number):
 
 if __name__ == '__main__':
     import sys
-    """if len(sys.argv) < 5 or len(sys.argv) > 12:
+    if len(sys.argv) < 5 or len(sys.argv) > 12:
         print("You must have at least 3 phone numbers to make a conference call. The maximum number of phone numbers allowed is 10")
         print(usage)
-        exit(-1)"""
+        exit(-1)
 
     main(sys.argv[1:-1], sys.argv[-1])
