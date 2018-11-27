@@ -61,7 +61,7 @@ def end_conference_with_text(conference_id, bandwidth_phone_number):
     #Send the text message to all members of the conference
     #This is done in the following steps:
         #1: Build the url and payload for sending the text message
-        #2: Pull all of the conference member's from Bandwidth's API
+        #2: Pull all of the conference members from Bandwidth's API
         #3: For each conference member, grab the associated call information from Bandwidth's API
         #4: With the call information, grab the conference member's phone number based on the direction of the call
         #5: Send the text message
