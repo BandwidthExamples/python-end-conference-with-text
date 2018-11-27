@@ -48,6 +48,7 @@ def end_conference_with_text(conference_id, phone_numbers, bandwidth_phone_numbe
     Returns:
         void
     """
+    #Waits for the creator to put in input for the ending text message
     group_text_message = input("Please type your ending text message and press enter when you are ready to end conference " + conference_id + ":\n")
 
     #End the conference
@@ -80,12 +81,12 @@ def start_conference(phone_numbers, bandwidth_phone_number):
 
     Args:
         phone_numbers (list<str>): The phone numbers to be added to the conference
-        bandwidth_phone_number: The Bandwidth phone number
+        bandwidth_phone_number: The Bandwidth phone number used to start the conference
 
     Returns:
         str: The ID of the conference call
     """
-    #Start conference
+    #Start the conference
     conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences".format(user_id = BANDWIDTH_USER_ID)
     start_conference_payload = {
         "from": bandwidth_phone_number
@@ -96,7 +97,7 @@ def start_conference(phone_numbers, bandwidth_phone_number):
     #https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}
     conference_id = response.headers['Location'].split("/")[-1]
 
-    #Create and add the calls to the conference. The "conferenceId" value must be set to the current conference id
+    #Create the calls and add them to the conference. The "conferenceId" value must be set to the current conference id
     #when creating a call in order to allow the call to be added to the conference
     create_call_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/calls".format(user_id = BANDWIDTH_USER_ID)
     create_call_payload = {

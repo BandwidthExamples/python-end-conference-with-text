@@ -1,6 +1,6 @@
 <div align="center">
 
-# Title
+# End A Conference Call With A Group Text Message
 
 <a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Messaging.png"/></a>
 <a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Voice.png"/></a>
