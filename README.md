@@ -30,6 +30,14 @@ BANDWIDTH_API_SECRET
 BANDWIDTH_API_TOKEN
 ```
 
+The python version used in this project is 3.7.0
+
+Required dependencies can be installed by running the following command
+
+```
+pip install -r requirements.txt
+```
+
 To start the project, run the following command
 
 ```
