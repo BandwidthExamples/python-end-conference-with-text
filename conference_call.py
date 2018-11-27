@@ -13,6 +13,7 @@ Copywrite Bandwidth INC 2018
 """
 
 import requests
+import json
 
 
 usage = """
@@ -36,19 +37,18 @@ except:
     exit(-1)
 
 
-def end_conference_with_text(conference_id, phone_numbers, bandwidth_phone_number):
+def end_conference_with_text(conference_id, bandwidth_phone_number):
     """
-    Ends the conference call with a text message send with the user's input
+    Ends the conference call with a text message sent with the user's input
 
     Args:
         conference_id (str): ID of the conference to end
-        phone_numbers (list<str>): All phone numbers in the conference
         bandwidth_phone_number (str): The Bandwidth phone number used to send the conference ending group text
 
     Returns:
         void
     """
-    #Waits for the creator to put in input for the ending text message
+    #Waits for the creator of the conference to put in input for the ending text message
     group_text_message = input("Please type your ending text message and press enter when you are ready to end conference " + conference_id + ":\n")
 
     #End the conference
@@ -59,15 +59,74 @@ def end_conference_with_text(conference_id, phone_numbers, bandwidth_phone_numbe
     requests.post(end_conference_url, auth=AUTH, json=end_conference_payload)
 
     #Send the text message to all members of the conference
+    #This is done in the following steps:
+        #1: Build the url and payload for sending the text message
+        #2: Pull all of the conference members from Bandwidth's API
+        #3: For each conference member, grab the associated call information from Bandwidth's API
+        #4: With the call information, grab the conference member's phone number based on the direction of the call
+        #5: Send the text message
     ##TODO: Change to V2 group message
-    ##TODO: Change to pull members from conference and get their phone numbers from the associated call
     send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
     send_text_payload = {
         "from": bandwidth_phone_number,
         "to": "",
         "text": group_text_message
     }
-    for phone_number in phone_numbers:
+
+    get_conference_members_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    #This endpoint returns a list of conference members as JSON
+    conference_members = json.loads(requests.get(get_conference_members_url, auth=AUTH).text)
+    for conference_member in conference_members:
+        #Each conference member is a JSON dictionary that looks like this
+        """
+        {
+            'addedTime': '{time}',
+            'call': 'https://api.catapult.inetwork.com/v1/users/{userId}/calls/{callId}',
+            'hold': boolean,
+            'id': '{memberId}',
+            'mute': boolean,
+            'state': 'string',
+            'joinTone': boolean,
+            'leavingTone': boolean
+        }
+        """
+
+        #The url in the 'call' field can be used to get information on this member's call
+        get_call_information_url = conference_member["call"]
+
+        #Call information is a JSON dictionary that looks like this
+        """
+        {
+            'activeTime': '{time}',
+            'chargeableDuration': int,
+            'conference': 'https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}',
+            'direction': 'out',
+            'endTime': '{time}',
+            'events': 'https://api.catapult.inetwork.com/v1/users/{userId}/calls/{callId}/events',
+            'from': '+1XXXYYYZZZZ',
+            'id': '{callId}',
+            'recordingFileFormat': 'string',
+            'recordingEnabled': boolean,
+            'recordings': 'https://api.catapult.inetwork.com/v1/users/{userId}/calls/{callId}/recordings',
+            'startTime': '{time}',
+            'state': 'string',
+            'to': '+1XXXYYYZZZZ',
+            'transcriptionEnabled': boolean,
+            'transcriptions': 'https://api.catapult.inetwork.com/v1/users/{userId}/calls/{callId}/transcriptions'
+        }
+        """
+        call_information = json.loads(requests.get(get_call_information_url, auth=AUTH).text)
+
+        #"direction" is "out" for a call that was originated by Bandwidth, and "from" will be the Bandwidth number and "to"
+        #will be the conference member's number. If "direction" is "in", these values are swapped.
+        #This allows us to get phone numbers from people who called into the conference after it was created
+        call_direction = call_information["direction"]
+        if call_direction == "out":
+            phone_number = call_information["to"]
+        else:
+            phone_number = call_information["from"]
+        
+        #Sends the text message to the phone number
         send_text_payload["to"] = phone_number
         requests.post(send_text_url, auth=AUTH, json=send_text_payload)
 
@@ -139,7 +198,7 @@ def main(phone_numbers, bandwidth_phone_number):
         void
     """
     conference_id = start_conference(phone_numbers, bandwidth_phone_number)
-    end_conference_with_text(conference_id, phone_numbers, bandwidth_phone_number)
+    end_conference_with_text(conference_id, bandwidth_phone_number)
 
 
 if __name__ == '__main__':

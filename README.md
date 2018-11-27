@@ -6,7 +6,7 @@
 <a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Voice.png"/></a>
 </div>
 
-Short description of project
+Ever had a conference call where you wanted to end the conference with a text message recap of the meeting? This project shows how you can do that using Bandwidth's Voice and Messaging APIs!
 
 ## Table of Contents
 
