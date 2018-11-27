@@ -39,7 +39,7 @@ except:
 
 def end_conference_with_text(conference_id, bandwidth_phone_number):
     """
-    Ends the conference call with a text message send with the user's input
+    Ends the conference call with a text message sent with the user's input
 
     Args:
         conference_id (str): ID of the conference to end
@@ -59,6 +59,12 @@ def end_conference_with_text(conference_id, bandwidth_phone_number):
     requests.post(end_conference_url, auth=AUTH, json=end_conference_payload)
 
     #Send the text message to all members of the conference
+    #This is done in the following steps:
+        #1: Build the url and payload for sending the text message
+        #2: Pull all of the conference member's from Bandwidth's API
+        #3: For each conference member, grab the associated call information from Bandwidth's API
+        #4: With the call information, grab the conference member's phone number based on the direction of the call
+        #5: Send the text message
     ##TODO: Change to V2 group message
     send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
     send_text_payload = {
