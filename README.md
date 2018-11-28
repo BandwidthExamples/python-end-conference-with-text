@@ -17,58 +17,69 @@ Ever had a conference call where you wanted to end the conference with a text me
 
 * Bandwidth Application Account (https://app.bandwidth.com)
 * Bandwidth V2 Messaging Account (https://go.bandwidth.com/messaging-v2-api.html)
+* A server to run the application, or a tunneling service like ngrok
 
 ## How It Works
 
-This project is a simple python script that starts a conference call, and ends the conference call with a group text message
+This project is a simple python script that starts a conference call, and ends the conference call with a group text message.
 
-Before running the project, the following environmental variables need to be set
+Before running the project, the following environmental variables need to be set:
 
 ```
 BANDWIDTH_USER_ID
 BANDWIDTH_API_SECRET
 BANDWIDTH_API_TOKEN
+BANDWIDTH_PHONE_NUMBER
+USER_PHONE_NUMBER
 ```
 
-The python version used in this project is 3.7.0
+Phone numbers must be in +1XXXYYYZZZZ format.
 
-Required dependencies can be installed by running the following command
+The python version used in this project is 3.7.0.
+
+Required dependencies can be installed by running the following command:
 
 ```
 pip install -r requirements.txt
 ```
 
-To start the project, run the following command
+To start the server, run the following command
 
 ```
-python conference_call.py <member-1-number> <member-2-number> ... <member-n-number> <bandwidth_phone_number>
+python conference_call.py
 ```
 
-Phone numbers must be in +1XXXYYYZZZZ format
+### Setting up the Bandwidth application
+Login to https://app.bandwidth.com and create a Bandwidth Application. This application will be both a voice and messaging application. Assign your BANDWIDTH_PHONE_NUMBER to this application.
 
-There is a limit of 10 member numbers for sending a group text, and you must have at least 3 numbers to make a conference call.
-The <bandwidth_phone_number> is your Bandwidth phone number that will start the conference call and send the ending group text.
+Make the `Voice callback URL` point to `<your-server>/voice` and the `Messaging callback URL` point to `<your-server>/message`
 
-Example
-```
-python conference_call.py +19191112222 +19191112223 +19191112224 +18281112222
-```
+### Starting the conference
+After the server has started, you can text your BANDWIDTH_PHONE_NUMBER from your USER_PHONE_NUMBER a list of numbers to start a conference.
 
-In this example, the 3 conference members will be `+19191112222 +19191112223 +19191112224` and the phone number for starting the conference and senting the final group text will be `+18281112222`
-
-After starting the conference call, you will receive a prompt that looks like this
+Example text message:
 
 ```
-Conference call has been started by +18281112222 to ['+19191112222', '+19191112223', '+19191112224']
-Please type your ending text message and press enter when you are ready to end conference conf-34dladc3:
-
++1XXXYYYZZZZ +1AAABBBCCCC +1DDDEEEFFFF
 ```
 
-Type in your message and press enter to end the conference with the group text
+Note that your USER_PHONE_NUMBER needs to also be included if you want to be included in the conference call.
+
+You can send up to 10 numbers.
+
+You will receive a response from your BANDWIDTH_PHONE_NUMBER that looks like this:
 
 ```
-Please type your ending text message and press enter when you are ready to end conference conf-34dladc3:
-We're done! Please remember to schedule time for our next meeting.
-Conference conf-34dladc3 has been ended. Group text send by +18281112222
-Group text message: We're done! Please remember to schedule time for our next meeting.
+Your conference has been created. Your requested members of the conference will receive a text message asking them to join the conference.
 ```
+
+Each of the numbers you requested to join the conference will receive a text message that looks like this:
+
+```
+You have been invited by USER_PHONE_NUMBER to join a conference. Please call BANDWIDTH_PHONE_NUMBER to join
+```
+
+After calling the BANDWIDTH_PHONE_NUMBER, the member will join the conference
+
+###Ending the conference
+The next text message sent by USER_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference.

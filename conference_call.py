@@ -14,16 +14,7 @@ Copywrite Bandwidth INC 2018
 
 import requests
 import json
-
-
-usage = """
-python conference_call.py <member-1-number> <member-2-number> ... <member-n-number> <bandwidth_phone_number>
-
-Phone numbers must be in +1XXXYYYZZZZ format
-
-There is a limit of 10 member numbers for sending a group text, and you must have at least 3 numbers to make a conference call.
-The <bandwidth_phone_number> is your Bandwidth phone number that will start the conference call and send the ending group text.
-"""
+from flask import Flask, request
 
 
 try:
@@ -31,28 +22,29 @@ try:
     BANDWIDTH_USER_ID = os.environ['BANDWIDTH_USER_ID']
     BANDWIDTH_API_TOKEN = os.environ['BANDWIDTH_API_TOKEN']
     BANDWIDTH_API_SECRET = os.environ['BANDWIDTH_API_SECRET']
+    BANDWIDTH_PHONE_NUMBER = os.environ['BANDWIDTH_PHONE_NUMBER']
+    USER_PHONE_NUMBER = os.environ['USER_PHONE_NUMBER']
     AUTH = (BANDWIDTH_API_TOKEN, BANDWIDTH_API_SECRET)
 except:
-    print("You need to set the following environmental variables: BANDWIDTH_USER_ID, BANDWIDTH_API_TOKEN, BANDWIDTH_API_SECRET")
+    print("You need to set the following environmental variables: BANDWIDTH_USER_ID, BANDWIDTH_API_TOKEN, BANDWIDTH_API_SECRET, BANDWIDTH_PHONE_NUMBER, USER_PHONE_NUMBER")
     exit(-1)
 
 
-def end_conference_with_text(conference_id, bandwidth_phone_number):
+app = Flask(__name__)
+
+
+def end_conference_with_text(group_text_message):
     """
     Ends the conference call with a text message sent with the user's input
 
     Args:
-        conference_id (str): ID of the conference to end
-        bandwidth_phone_number (str): The Bandwidth phone number used to send the conference ending group text
+        group_text_message (str): The message sent after the conference is ended
 
     Returns:
         void
     """
-    #Waits for the creator of the conference to put in input for the ending text message
-    group_text_message = input("Please type your ending text message and press enter when you are ready to end conference " + conference_id + ":\n")
-
     #End the conference
-    end_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    end_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}".format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
     end_conference_payload = {
         "state": "completed"
     }
@@ -68,12 +60,12 @@ def end_conference_with_text(conference_id, bandwidth_phone_number):
     ##TODO: Change to V2 group message
     send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
     send_text_payload = {
-        "from": bandwidth_phone_number,
+        "from": BANDWIDTH_PHONE_NUMBER,
         "to": "",
         "text": group_text_message
     }
 
-    get_conference_members_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    get_conference_members_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
     #This endpoint returns a list of conference members as JSON
     conference_members = json.loads(requests.get(get_conference_members_url, auth=AUTH).text)
     for conference_member in conference_members:
@@ -130,17 +122,16 @@ def end_conference_with_text(conference_id, bandwidth_phone_number):
         send_text_payload["to"] = phone_number
         requests.post(send_text_url, auth=AUTH, json=send_text_payload)
 
-    print("Conference " + conference_id + " has been ended. Group text send by " + bandwidth_phone_number)
+    print("Conference " + CONFERENCE_ID + " has been ended. Group text send by " + BANDWIDTH_PHONE_NUMBER)
     print("Group text message: " + group_text_message)
 
 
-def start_conference(phone_numbers, bandwidth_phone_number):
+def start_conference(phone_numbers):
     """
     Starts the conference call
 
     Args:
         phone_numbers (list<str>): The phone numbers to be added to the conference
-        bandwidth_phone_number: The Bandwidth phone number used to start the conference
 
     Returns:
         str: The ID of the conference call
@@ -148,64 +139,73 @@ def start_conference(phone_numbers, bandwidth_phone_number):
     #Start the conference
     conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences".format(user_id = BANDWIDTH_USER_ID)
     start_conference_payload = {
-        "from": bandwidth_phone_number
+        "from": BANDWIDTH_PHONE_NUMBER
     }
     response = requests.post(conference_url, auth=AUTH, json=start_conference_payload)
+
+    text_message = "HI"
+
+    #Send each number an invite to the conference
+    send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
+    send_text_payload = {
+        "from": BANDWIDTH_PHONE_NUMBER,
+        "to": "",
+        "text": text_message
+    }
+
+    for phone_number in phone_numbers:
+        #Sends the text message to the phone number
+        send_text_payload["to"] = phone_number
+        requests.post(send_text_url, auth=AUTH, json=send_text_payload)
+
+    print("Conference call has been started by " + BANDWIDTH_PHONE_NUMBER + ". The following numbers have been notified: " + str(phone_numbers))
 
     #Get the conference id. The response Location value looks like this:
     #https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}
     conference_id = response.headers['Location'].split("/")[-1]
-
-    #Create the calls and add them to the conference. The "conferenceId" value must be set to the current conference id
-    #when creating a call in order to allow the call to be added to the conference
-    create_call_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/calls".format(user_id = BANDWIDTH_USER_ID)
-    create_call_payload = {
-        "from": bandwidth_phone_number,
-        "to": "",
-        "conferenceId": conference_id
-    }
-    add_call_to_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
-    add_call_to_conference_payload = {
-        "callId": ""
-    }
-
-    for phone_number in phone_numbers:
-        #Create call
-        create_call_payload["to"] = phone_number
-        response = requests.post(create_call_url, auth=AUTH, json=create_call_payload)
-
-        #Get call id. This is needed to add the call to the conference. The response Location value looks like this:
-        #https://api.catapult.inetwork.com/v1/users/{userId}/calls/{callId}
-        call_id = response.headers['Location'].split("/")[-1]
-
-        #Add call to conference
-        add_call_to_conference_payload["callId"] = call_id
-        response = requests.post(add_call_to_conference_url, auth=AUTH, json=add_call_to_conference_payload)
-
-    print("Conference call has been started by " + bandwidth_phone_number + " to " + str(phone_numbers))
     return conference_id
 
 
-def main(phone_numbers, bandwidth_phone_number):
+#TODO: Write this
+def add_call_to_conference(call_id):
     """
-    Main method for the script
+    Adds the call to the conference
 
     Args:
-        phone_numbers (list<string>): The phone numbers to use for the conference
-        bandwidth_phone_number (str): The Bandwidth phone number to send the ending group text
+        call_id (str): The call id to add to the conference
 
     Returns:
         void
     """
-    conference_id = start_conference(phone_numbers, bandwidth_phone_number)
-    end_conference_with_text(conference_id, bandwidth_phone_number)
+
+
+CONFERENCE_ID = None
+@app.route("/message", methods=["POST"])
+def incoming_message_handler():
+    data = json.loads(request.data)
+    incoming_number = data["from"]
+
+    if CONFERENCE_ID is None and incoming_number == USER_PHONE_NUMBER:
+        phone_numbers = text_message.split(" ")
+        CONFERENCE_ID = start_conference(phone_numbers)
+
+    elif CONFERENCE_ID is not None and incoming_number == USER_PHONE_NUMBER:
+        end_conference(text_message)
+        CONFERENCE_ID = None
+
+    return ""
+
+
+@app.route("/voice", methods=["POST"])
+def incoming_voice_handler():
+    data = json.loads(request.data)
+
+    if CONFERENCE_ID is not None:
+        call_id = data["callId"]
+        add_call_to_conference(call_id)
+
+    return ""
 
 
 if __name__ == '__main__':
-    import sys
-    if len(sys.argv) < 5 or len(sys.argv) > 12:
-        print("You must have at least 3 phone numbers to make a conference call. The maximum number of phone numbers allowed is 10")
-        print(usage)
-        exit(-1)
-
-    main(sys.argv[1:-1], sys.argv[-1])
+    app.run()
