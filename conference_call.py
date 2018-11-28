@@ -29,7 +29,7 @@ except:
     print("You need to set the following environmental variables: BANDWIDTH_USER_ID, BANDWIDTH_API_TOKEN, BANDWIDTH_API_SECRET, BANDWIDTH_PHONE_NUMBER, USER_PHONE_NUMBER")
     exit(-1)
 
-
+CONFERENCE_ID = None
 app = Flask(__name__)
 
 
@@ -111,7 +111,8 @@ def end_conference_with_text(group_text_message):
 
         #"direction" is "out" for a call that was originated by Bandwidth, and "from" will be the Bandwidth number and "to"
         #will be the conference member's number. If "direction" is "in", these values are swapped.
-        #This allows us to get phone numbers from people who called into the conference after it was created
+        #This allows us to get phone numbers from people who called into the conference and were called into the conference,
+        #and ignores those who declined to join the conference.
         call_direction = call_information["direction"]
         if call_direction == "out":
             phone_number = call_information["to"]
@@ -143,7 +144,7 @@ def start_conference(phone_numbers):
     }
     response = requests.post(conference_url, auth=AUTH, json=start_conference_payload)
 
-    text_message = "HI"
+    text_message = "You have been invited by {user_phone} to join a conference call on {bandwidth_phone}. Please call this number to join".format(user_phone = USER_PHONE_NUMBER, bandwidth_phone = BANDWIDTH_PHONE_NUMBER)
 
     #Send each number an invite to the conference
     send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
@@ -158,39 +159,53 @@ def start_conference(phone_numbers):
         send_text_payload["to"] = phone_number
         requests.post(send_text_url, auth=AUTH, json=send_text_payload)
 
-    print("Conference call has been started by " + BANDWIDTH_PHONE_NUMBER + ". The following numbers have been notified: " + str(phone_numbers))
-
     #Get the conference id. The response Location value looks like this:
     #https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}
     conference_id = response.headers['Location'].split("/")[-1]
+
+    print("Conference call " + conference_id + " has been started by " + BANDWIDTH_PHONE_NUMBER + ". The following numbers have been notified: " + str(phone_numbers))
+
     return conference_id
 
 
 #TODO: Write this
-def add_call_to_conference(call_id):
+def add_call_to_conference(call_id, conference_id):
     """
     Adds the call to the conference
 
     Args:
         call_id (str): The call id to add to the conference
+        conference_id (str): The id of the conference
 
     Returns:
         void
     """
+    add_call_to_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    add_call_to_conference_payload = {
+        "callId": call_id
+    }
+
+    requests.post(add_call_to_conference_url, auth=AUTH, json=add_call_to_conference_payload)
 
 
-CONFERENCE_ID = None
 @app.route("/message", methods=["POST"])
 def incoming_message_handler():
+    global CONFERENCE_ID
+
     data = json.loads(request.data)
     incoming_number = data["from"]
+    text_message = data["text"]
 
     if CONFERENCE_ID is None and incoming_number == USER_PHONE_NUMBER:
         phone_numbers = text_message.split(" ")
+        if len(phone_numbers) > 10:
+            print("Cannot have more than 10 people in a group text")
+            return ""
+
         CONFERENCE_ID = start_conference(phone_numbers)
 
     elif CONFERENCE_ID is not None and incoming_number == USER_PHONE_NUMBER:
-        end_conference(text_message)
+        end_conference_with_text(text_message)
         CONFERENCE_ID = None
 
     return ""
@@ -198,11 +213,13 @@ def incoming_message_handler():
 
 @app.route("/voice", methods=["POST"])
 def incoming_voice_handler():
+    global CONFERENCE_ID
+
     data = json.loads(request.data)
 
     if CONFERENCE_ID is not None:
         call_id = data["callId"]
-        add_call_to_conference(call_id)
+        add_call_to_conference(call_id, CONFERENCE_ID)
 
     return ""
 
