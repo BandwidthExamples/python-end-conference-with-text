@@ -15,7 +15,7 @@ Ever had a conference call where you wanted to end the conference with a text me
 
 ## Prereqs
 
-* Bandwidth Application Account (https://app.bandwidth.com)
+* Bandwidth Dashboard Account (https://dashboard.bandwidth.com)
 * Bandwidth V2 Messaging Account (https://go.bandwidth.com/messaging-v2-api.html)
 * A server to run the application, or a tunneling service like ngrok
 
@@ -50,9 +50,7 @@ python conference_call.py
 ```
 
 ### Setting up the Bandwidth application
-Login to https://app.bandwidth.com and create a Bandwidth Application. This application will be both a voice and messaging application. Assign your BANDWIDTH_PHONE_NUMBER to this application.
-
-Make the `Voice callback URL` point to `<your-server>/voice` and the `Messaging callback URL` point to `<your-server>/message`
+Login to https://dashboard.bandwidth.com and create a Bandwidth Application. This application will be both a voice and messaging application. Assign your BANDWIDTH_PHONE_NUMBER to this application, and make the `Callback URL` point to `<your-server>`.
 
 ### Starting the conference
 After the server has started, you can text your BANDWIDTH_PHONE_NUMBER from your USER_PHONE_NUMBER a list of numbers to start a conference.
