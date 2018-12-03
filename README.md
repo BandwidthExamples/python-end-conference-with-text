@@ -21,7 +21,7 @@ Ever had a conference call where you wanted to end the conference with a text me
 
 ## How It Works
 
-This project is a simple python script that starts a conference call, and ends the conference call with a group text message.
+This project launches a server that creates a conference call after you text a list of phone numbers to you Bandwidth phone number. You can end the conference call by sending a text message to the same Bandwidth phone number, and the contents of that message will be sent to all members of the conference.
 
 Before running the project, the following environmental variables need to be set:
 
@@ -67,12 +67,6 @@ Note that your USER_PHONE_NUMBER needs to also be included if you want to be inc
 
 You can send up to 10 numbers.
 
-You will receive a response from your BANDWIDTH_PHONE_NUMBER that looks like this:
-
-```
-Your conference has been created. Your requested members of the conference will receive a text message asking them to join the conference.
-```
-
 Each of the numbers you requested to join the conference will receive a text message that looks like this:
 
 ```
@@ -82,4 +76,4 @@ You have been invited by USER_PHONE_NUMBER to join a conference. Please call BAN
 After calling the BANDWIDTH_PHONE_NUMBER, the member will join the conference
 
 ###Ending the conference
-The next text message sent by USER_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference.
+The next text message sent by USER_PHONE_NUMBER to BANDWIDTH_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference. The conference will then end

@@ -123,9 +123,6 @@ def end_conference_with_text(group_text_message):
         send_text_payload["to"] = phone_number
         requests.post(send_text_url, auth=AUTH, json=send_text_payload)
 
-    print("Conference " + CONFERENCE_ID + " has been ended. Group text send by " + BANDWIDTH_PHONE_NUMBER)
-    print("Group text message: " + group_text_message)
-
 
 def start_conference(phone_numbers):
     """
@@ -163,12 +160,9 @@ def start_conference(phone_numbers):
     #https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}
     conference_id = response.headers['Location'].split("/")[-1]
 
-    print("Conference call " + conference_id + " has been started by " + BANDWIDTH_PHONE_NUMBER + ". The following numbers have been notified: " + str(phone_numbers))
-
     return conference_id
 
 
-#TODO: Write this
 def add_call_to_conference(call_id, conference_id):
     """
     Adds the call to the conference
