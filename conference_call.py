@@ -1,7 +1,7 @@
 """
 conference_call.py
 
-A simple script that can be used to start a conference call, and
+A simple script that launches a server that can be used to start a conference call, and
 ends the conference by sending a text message to all members of the conference.
 
 This script uses Bandwidth's Messaging V2 API and Bandwidth's Voice API, and accesses
