@@ -72,13 +72,19 @@ Note that your USER_PHONE_NUMBER needs to also be included if you want to be inc
 
 Bandwidth's conference calls are limited to 20 participants, so you can send up to 20 numbers.
 
-Each of the numbers you requested to join the conference will receive a text message that looks like this:
+Each of the numbers you requested to join the conference will receive the following text message:
 
 ```
-You have been invited by USER_PHONE_NUMBER to join a conference. Please call BANDWIDTH_PHONE_NUMBER to join
+You have been invited by USER_PHONE_NUMBER to join a conference call on BANDWIDTH_PHONE_NUMBER. Please call this number to join.
 ```
 
 After calling the BANDWIDTH_PHONE_NUMBER, the member will join the conference
 
+You will receive the following text message confirming that you've started the conference:
+
+```
+You have started the conference! Please respond to this message when you are ready to end the conference. Your message will be forwarded to all conference participants.
+```
+
 ### Ending the conference
-The next text message sent by USER_PHONE_NUMBER to BANDWIDTH_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference. The conference will then end
+The next text message sent by your USER_PHONE_NUMBER to your BANDWIDTH_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference. The conference will then end.
