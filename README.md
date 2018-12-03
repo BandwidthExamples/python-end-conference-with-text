@@ -16,7 +16,6 @@ Ever had a conference call where you wanted to end the conference with a text me
 ## Prereqs
 
 * Bandwidth Application Account (https://app.bandwidth.com)
-* Bandwidth V2 Messaging Account (https://go.bandwidth.com/messaging-v2-api.html)
 * A server to run the application, or a tunneling service like ngrok
 
 ## How It Works
