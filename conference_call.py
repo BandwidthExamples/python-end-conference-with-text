@@ -30,6 +30,11 @@ except:
     exit(-1)
 
 CONFERENCE_ID = None
+CONFERENCE_URL_BASE = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences"
+END_CONFERENCE_URL_BASE = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}"
+ADD_CALL_TO_CONFERENCE_URL_BASE = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members"
+SEND_TEXT_URL_BASE = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages"
+GET_CONFERENCE_MEMBERS_URL_BASE = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members"
 app = Flask(__name__)
 
 
@@ -44,7 +49,7 @@ def end_conference_with_text(group_text_message):
         void
     """
     #End the conference
-    end_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}".format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
+    end_conference_url = END_CONFERENCE_URL_BASE.format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
     end_conference_payload = {
         "state": "completed"
     }
@@ -57,14 +62,14 @@ def end_conference_with_text(group_text_message):
         #3: For each conference member, grab the associated call information from Bandwidth's API
         #4: With the call information, grab the conference member's phone number based on the direction of the call
         #5: Send the text message
-    send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
+    send_text_url = SEND_TEXT_URL_BASE.format(user_id = BANDWIDTH_USER_ID)
     send_text_payload = {
         "from": BANDWIDTH_PHONE_NUMBER,
         "to": "",
         "text": group_text_message
     }
 
-    get_conference_members_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
+    get_conference_members_url = GET_CONFERENCE_MEMBERS_URL_BASE.format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
     #This endpoint returns a list of conference members as JSON
     conference_members = json.loads(requests.get(get_conference_members_url, auth=AUTH).text)
     conference_members_phone_numbers = []
@@ -142,7 +147,7 @@ def start_conference(phone_numbers):
         str: The ID of the conference call
     """
     #Start the conference
-    conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences".format(user_id = BANDWIDTH_USER_ID)
+    conference_url = CONFERENCE_URL_BASE.format(user_id = BANDWIDTH_USER_ID)
     start_conference_payload = {
         "from": BANDWIDTH_PHONE_NUMBER
     }
@@ -151,7 +156,7 @@ def start_conference(phone_numbers):
     text_message = "You have been invited by {user_phone} to join a conference call on {bandwidth_phone}. Please call this number to join.".format(user_phone = USER_PHONE_NUMBER, bandwidth_phone = BANDWIDTH_PHONE_NUMBER)
 
     #Send each number an invite to the conference
-    send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
+    send_text_url = SEND_TEXT_URL_BASE.format(user_id = BANDWIDTH_USER_ID)
     send_text_payload = {
         "from": BANDWIDTH_PHONE_NUMBER,
         "to": "",
@@ -186,7 +191,7 @@ def add_call_to_conference(call_id, conference_id):
     Returns:
         void
     """
-    add_call_to_conference_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
+    add_call_to_conference_url = ADD_CALL_TO_CONFERENCE_URL_BASE.format(user_id = BANDWIDTH_USER_ID, conference_id = conference_id)
     add_call_to_conference_payload = {
         "callId": call_id
     }
@@ -205,7 +210,7 @@ def incoming_message_handler():
     if CONFERENCE_ID is None and incoming_number == USER_PHONE_NUMBER:
         phone_numbers = text_message.split(" ")
         if len(phone_numbers) > 20:
-            send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
+            send_text_url = SEND_TEXT_URL_BASE.format(user_id = BANDWIDTH_USER_ID)
             send_text_payload = {
                 "from": BANDWIDTH_PHONE_NUMBER,
                 "to": USER_PHONE_NUMBER,
