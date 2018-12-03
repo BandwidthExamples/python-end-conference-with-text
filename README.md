@@ -80,5 +80,5 @@ You have been invited by USER_PHONE_NUMBER to join a conference. Please call BAN
 
 After calling the BANDWIDTH_PHONE_NUMBER, the member will join the conference
 
-###Ending the conference
+### Ending the conference
 The next text message sent by USER_PHONE_NUMBER to BANDWIDTH_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference. The conference will then end
