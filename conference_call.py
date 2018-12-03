@@ -182,6 +182,13 @@ def add_call_to_conference(call_id, conference_id):
     requests.post(add_call_to_conference_url, auth=AUTH, json=add_call_to_conference_payload)
 
 
+@app.route("/", methods=["POST"])
+def incoming_event_handler():
+    data = json.loads(request.data)
+    print(data)
+    return ""
+
+
 @app.route("/message", methods=["POST"])
 def incoming_message_handler():
     global CONFERENCE_ID

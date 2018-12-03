@@ -50,7 +50,7 @@ python conference_call.py
 ```
 
 ### Setting up the Bandwidth application
-Login to https://dashboard.bandwidth.com and create a Bandwidth Application. This application will be both a voice and messaging application. Assign your BANDWIDTH_PHONE_NUMBER to this application, and make the `Callback URL` point to `<your-server>`.
+Login to https://dashboard.bandwidth.com and create a Bandwidth Application. This application will be both a voice and messaging application. Assign your location that includes BANDWIDTH_PHONE_NUMBER to this application, and make the `Callback URL` point to `<your-server>`.
 
 ### Starting the conference
 After the server has started, you can text your BANDWIDTH_PHONE_NUMBER from your USER_PHONE_NUMBER a list of numbers to start a conference.
