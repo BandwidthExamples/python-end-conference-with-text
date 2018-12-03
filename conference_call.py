@@ -4,7 +4,7 @@ conference_call.py
 A simple script that launches a server that can be used to start a conference call, and
 ends the conference by sending a text message to all members of the conference.
 
-This script uses Bandwidth's Messaging V2 API and Bandwidth's Voice API, and accesses
+This script uses Bandwidth's Messaging API and Bandwidth's Voice API, and accesses
 these APIs directly using the Python request library.
 
 Author: Jacob Mulford
@@ -57,7 +57,6 @@ def end_conference_with_text(group_text_message):
         #3: For each conference member, grab the associated call information from Bandwidth's API
         #4: With the call information, grab the conference member's phone number based on the direction of the call
         #5: Send the text message
-    ##TODO: Change to V2 group message
     send_text_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/messages".format(user_id = BANDWIDTH_USER_ID)
     send_text_payload = {
         "from": BANDWIDTH_PHONE_NUMBER,
@@ -68,6 +67,7 @@ def end_conference_with_text(group_text_message):
     get_conference_members_url = "https://api.catapult.inetwork.com/v1/users/{user_id}/conferences/{conference_id}/members".format(user_id = BANDWIDTH_USER_ID, conference_id = CONFERENCE_ID)
     #This endpoint returns a list of conference members as JSON
     conference_members = json.loads(requests.get(get_conference_members_url, auth=AUTH).text)
+
     for conference_member in conference_members:
         #Each conference member is a JSON dictionary that looks like this
         """

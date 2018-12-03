@@ -1,6 +1,6 @@
 <div align="center">
 
-# End A Conference Call With A Group Text Message
+# End A Conference Call With A Text Message
 
 <a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Messaging.png"/></a>
 <a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Voice.png"/></a>
@@ -26,11 +26,17 @@ Before running the project, the following environmental variables need to be set
 
 ```
 BANDWIDTH_USER_ID
-BANDWIDTH_API_SECRET
 BANDWIDTH_API_TOKEN
+BANDWIDTH_API_SECRET
 BANDWIDTH_PHONE_NUMBER
 USER_PHONE_NUMBER
 ```
+
+BANDWIDTH_USER_ID, BANDWIDTH_API_TOKEN, and BANDWIDTH_API_SECRET can be found on your account on https://app.bandwidth.com.
+
+BANDWIDTH_PHONE_NUMBER is your Bandwidth phone number that will be used for this application.
+
+USER_PHONE_NUMBER is your personal phone number used to start and stop the conference call.
 
 Phone numbers must be in +1XXXYYYZZZZ format.
 
@@ -64,7 +70,7 @@ Example text message:
 
 Note that your USER_PHONE_NUMBER needs to also be included if you want to be included in the conference call.
 
-You can send up to 10 numbers.
+Bandwidth's conference calls are limited to 20 participants, so you can send up to 20 numbers.
 
 Each of the numbers you requested to join the conference will receive a text message that looks like this:
 
@@ -74,5 +80,5 @@ You have been invited by USER_PHONE_NUMBER to join a conference. Please call BAN
 
 After calling the BANDWIDTH_PHONE_NUMBER, the member will join the conference
 
-###Ending the conference
+### Ending the conference
 The next text message sent by USER_PHONE_NUMBER to BANDWIDTH_PHONE_NUMBER will signal the end of the conference. You can send anything you like, and that text message will be forwarded to all members of the conference. The conference will then end
