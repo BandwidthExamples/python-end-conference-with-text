@@ -152,6 +152,10 @@ def start_conference(phone_numbers):
         "from": BANDWIDTH_PHONE_NUMBER
     }
     response = requests.post(conference_url, auth=AUTH, json=start_conference_payload)
+     
+    #Get the conference id. The response Location value looks like this:
+    #https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}
+    conference_id = response.headers['Location'].split("/")[-1]
 
     text_message = "You have been invited by {user_phone} to join a conference call on {bandwidth_phone}. Please call this number to join.".format(user_phone = USER_PHONE_NUMBER, bandwidth_phone = BANDWIDTH_PHONE_NUMBER)
 
@@ -172,10 +176,6 @@ def start_conference(phone_numbers):
     send_text_payload["to"] = USER_PHONE_NUMBER
     send_text_payload["text"] = "You have started the conference! Please respond to this message when you are ready to end the conference. Your message will be forwarded to all conference participants."
     requests.post(send_text_url, auth=AUTH, json=send_text_payload)
-    
-    #Get the conference id. The response Location value looks like this:
-    #https://api.catapult.inetwork.com/v1/users/{userId}/conferences/{conferenceId}
-    conference_id = response.headers['Location'].split("/")[-1]
 
     return conference_id
 
