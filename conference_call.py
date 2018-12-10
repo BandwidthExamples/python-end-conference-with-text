@@ -9,7 +9,7 @@ these APIs directly using the Python request library.
 
 Author: Jacob Mulford
 
-Copywrite Bandwidth INC 2018
+Copyright Bandwidth INC 2018
 """
 
 import requests
