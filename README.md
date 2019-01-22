@@ -2,8 +2,7 @@
 
 # End A Conference Call With A Text Message
 
-<a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Messaging.png"/></a>
-<a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_Voice.png"/></a>
+<a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW-Voice-Messaging.png"/></a>
 </div>
 
 Ever had a conference call where you wanted to end the conference with a text message recap of the meeting? This project shows how you can do that using Bandwidth's Voice and Messaging APIs!
